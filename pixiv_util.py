@@ -1,0 +1,1 @@
+https://github.com/upbit/pixivpy/issues/68
