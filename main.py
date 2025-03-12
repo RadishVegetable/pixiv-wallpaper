@@ -1,60 +1,37 @@
 import json
 import os.path
-from datetime import datetime,timedelta
-from PicMode import PicMode
-from pixiv_auth import login
-from pixivpy3 import AppPixivAPI
-import re
+import time
 
-# access_token,refresh_token = login()
-#
-# data = {
-#     "access_token":access_token,
-#     "refresh_token":refresh_token
-# }
-# with open('config.json', 'w', encoding='utf-8') as f:
-#     json.dump(data,f, ensure_ascii=False, indent=4)
+from matplotlib.pyplot import title
+from multipart import file_path
+
+from ctypes_util import WallpaperSet
+from lolicon_api_util import PixivQuery
+
+if __name__ == '__main__':
+    pq = PixivQuery()
+    # pq.update_param("aspectRatio", 'gt1.7lt1.8')
+    url = ""
+    response = None
+    while True:
+        for i in range(10):
+            print("尝试获取壁纸，第{}次".format(i + 1))
+            response = pq.get_pic()
+            url = response.data[0].urls.get_item()
+            if pq.test_url_status(url):
+                break
+            else:
+                print("尝试获取壁纸失败")
+
+        print("地址正确：{}，开始下载".format(url))
+        dir_path = os.path.join(os.path.abspath(os.path.curdir), 'photo')
+        file_path = pq.download(url=url, path=dir_path)
+        print("下载完成，标题为：{}".format(response.data[0].title))
+        ws = WallpaperSet(wallpaper_path=file_path)
+        ws.set_wallpaper()
+        print("等待3分钟")
+        time.sleep(180)
 
 
-current_time = datetime.now()
-current_date = current_time.date().strftime("%Y-%m-%d")
-yesterday_date = (current_time - timedelta(days=1)).strftime("%Y-%m-%d")
 
-
-with open('config.json', 'r', encoding='utf-8') as file:
-    token = json.load(file)
-
-api = AppPixivAPI()
-
-api.set_auth(token['access_token'], token['refresh_token'])
-
-
-photo_path = os.path.join(os.path.curdir,'photo',yesterday_date)
-if not os.path.exists(photo_path):
-    os.mkdir(photo_path)
-
-
-json_result = api.illust_ranking(PicMode.DAY_R18.value, date=yesterday_date)
-
-i = 0
-for illust in json_result.illusts:
-
-    i+=1
-    id = illust.id
-    print(f'''index:{i}, {id} is downloading, title = {illust.title}''')
-    origin_url=illust.meta_single_page.original_image_url
-
-    if origin_url is not None:
-        api.download(url=origin_url, path=photo_path)
-    else:
-        # 套图
-        meta_pages = illust.meta_pages
-        j = 0
-        for mp in meta_pages:
-            origin_url = mp.image_urls.original
-            print(f'''index:{i}, {id} is downloading,sub id is {os.path.basename(origin_url)}, title = {illust.title}''')
-            api.download(url=origin_url, path=photo_path)
-            j+=1
-
-print("ok")
 

@@ -13,3 +13,16 @@ class PicMode(Enum):
     DAY_FEMALE_R18 = 'day_female_r18'
     WEEK_R18 = 'week_r18'
     WEEK_R18G = 'week_r18g'
+
+
+class WallpaperStyle(Enum):
+    """
+    (x,y)
+    x: WallpaperStyle
+    y: TileWallpaper
+    """
+    TILED = ('0','1')   #平铺
+    CENTERED = ('0','0')    #居中
+    STRETCHED = ('2','0')   #拉伸
+    FIT = ('6','0') #适应
+    FILL = ('10','0')   #填充
